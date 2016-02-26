@@ -24,8 +24,7 @@
         GeneratedClass.__init__(self)
 
     def onLoad(self):
-        #put initialization code here
-        pass
+        self.framemanager = ALProxy("ALFrameManager")
 
     def onUnload(self):
         #put clean-up code here
@@ -55,7 +54,7 @@
                 "mode": "show_html"
             }
 
-            res = requests.post(
+            res = requests.get(
                 url + "/http",
                 data = data,
                 timeout=timeout
@@ -68,7 +67,7 @@
             response_json = res.json()
             self.logger.info(json.dumps(response_json, indent = 4))
 
-            self.onStopped(text)
+            self.onStopped("ok")
 
         except requests.exceptions.RequestException, message:
             self.logger.warn("Failed to open: %s, message=%s" % (url, message))
@@ -83,6 +82,7 @@
                             <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
                             <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
                             <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
+                            <Parameter name="Timeout" inherits_from_parent="0" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
                         </Box>
                         <Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" />
                     </Diagram>
