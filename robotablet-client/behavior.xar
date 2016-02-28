@@ -15,13 +15,259 @@
             <BehaviorLayer name="behavior_layer1">
                 <BehaviorKeyframe name="keyframe1" index="1">
                     <Diagram>
-                        <Box name="HTTP Get" id="1" localization="8" tooltip="" x="163" y="64">
-                            <bitmap>media/images/box/box-python-script.png</bitmap>
+                        <Box name="N WS Connect" id="6" localization="8" tooltip="" x="187" y="411">
+                            <bitmap>media/images/box/box-diagram.png</bitmap>
                             <script language="4">
                                 <content>
-                                    <![CDATA[class MyClass(GeneratedClass):
+                                    <![CDATA[]]>
+</content>
+                            </script>
+                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                            <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                            <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                            <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
+                            <Timeline enable="0">
+                                <BehaviorLayer name="behavior_layer1">
+                                    <BehaviorKeyframe name="keyframe1" index="1">
+                                        <Diagram>
+                                            <Box name="WS Connection" id="2" localization="8" tooltip="" x="133" y="26">
+                                                <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[import json
+
+class MyClass(GeneratedClass):
     def __init__(self):
         GeneratedClass.__init__(self)
+
+    def _init_read_library(self):
+        import sys, os
+
+        self.folderName = os.path.join(
+            self.framemanager.getBehaviorPath(self.behaviorId), './lib')
+
+        if self.folderName not in sys.path:
+            sys.path.append(self.folderName)
+
+    def _init_websocket_connection(self):
+        import websocket
+
+        websocket.enableTrace(True)
+        websocket.setdefaulttimeout(500)
+
+        ws_url = 'ws://' + 'localhost:3000' + '/rs'
+
+        self.ws = websocket.WebSocketApp(ws_url,
+                                         on_message=self._ws_on_message,
+                                         on_error=self._ws_on_error,
+                                         on_close=self._ws_on_close)
+
+        self.ws.on_open = self._ws_on_open
+        self.ws.run_forever()
+
+    def _ws_send_message(self, input_json):
+        try:
+            json_data = json.dumps(input_json)
+            self.ws.send(json_data)
+
+        except ValueError:
+            self.logger.error('websocket error has occurred')
+
+    def _ws_on_open(self, ws):
+        self.logger.info('websocket onopen')
+
+    def _ws_on_message(self, ws, ws_message):
+        self.logger.info('websocket onmessage: ' + ws_message)
+
+        try:
+            ws_message = json.loads(ws_message)
+            to = str(ws_message["to"])
+
+            robot_behavior = ws_message["robotBehavior"]
+            tablet_action = str(robot_behavior["tabletAction"])
+            self.logger.info('websocket tablet_action: ' + tablet_action)
+
+        except Exception as e:
+            self.logger.error("type: %s" % type(e))
+            self.logger.error("args: %s" % e.args)
+            self.logger.error("message: %s" % e.message)
+            self.logger.error("%s" % e)
+
+        if tablet_action == "select_menu":
+            menu_id = str(robot_behavior["menuId"])
+            selection_id = str(robot_behavior["selectionId"])
+
+            message = {"key": menu_id, "value": selection_id}
+
+            if self.freez == False:
+                self.onMessageReceived(json.dumps(message))
+
+    def _ws_on_close(self, ws):
+        self.logger.info('websocket onclose')
+
+    def _ws_on_error(self, ws, error):
+        self.logger.error('websocket onerror: ' + error)
+        self.output_connection_error()
+
+    def onLoad(self):
+        self.ws = None
+        self.freez = False
+        self.connectonToken = None
+
+        self.framemanager = ALProxy("ALFrameManager")
+
+        self.isVirtualRobot = False
+
+    def onUnload(self):
+        self.ws = None
+        self.freez = False
+        self.connectonToken = None
+
+        self.framemanager = None
+
+    def onInput_onStart(self):
+
+        self._init_read_library()
+        self._init_websocket_connection()
+
+        self.onStopped()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
+                                                <Output name="onMessageReceived" type="3" type_size="1" nature="1" inner="0" tooltip="" id="5" />
+                                            </Box>
+                                            <Box name="Log" id="4" localization="8" tooltip="Prompt the message in the debug window. You can set a prefix and a priority&#x0A;for the message in the parameters." x="414" y="30">
+                                                <bitmap>media/images/box/print.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        #~ puts code for box initialization here
+        pass
+
+    def onUnload(self):
+        #~ puts code for box cleanup here
+        pass
+
+    def onInput_message(self, p):
+        sPriority = self.getParameter("Priority")
+        sMessage = self.getParameter("Message prefix")
+        if( sMessage != "" and p != None ):
+            sMessage += ": "
+        if( p != None ):
+            sMessage += str(p)
+        if( sPriority == "Fatal" ):
+            self.logger.fatal( sMessage )
+        elif( sPriority == "Error" ):
+            self.logger.error( sMessage )
+        elif( sPriority == "Warning" ):
+            self.logger.warning( sMessage )
+        elif( sPriority == "Info" ):
+            self.logger.info( sMessage )
+        elif( sPriority == "Debug" ):
+            self.logger.debug( sMessage )
+        self.onDone()]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="message" type="0" type_size="1" nature="1" inner="0" tooltip='The message to print or a &quot;Bang&quot; to only print the message set as parameter.' id="2" />
+                                                <Output name="onDone" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent when box behavior is finished." id="3" />
+                                                <Parameter name="Message prefix" inherits_from_parent="0" content_type="3" value="Message text" default_value="Message text" custom_choice="0" tooltip="Enter the text you want to print before the input message." id="4" />
+                                                <Parameter name="Priority" inherits_from_parent="0" content_type="3" value="Info" default_value="Info" custom_choice="0" tooltip="Enter the priority of your message. If you select error, the box will get red when it will be stimulated." id="5">
+                                                    <Choice value="Fatal" />
+                                                    <Choice value="Error" />
+                                                    <Choice value="Warning" />
+                                                    <Choice value="Info" />
+                                                    <Choice value="Debug" />
+                                                </Parameter>
+                                            </Box>
+                                            <Box name="Raise Event" id="5" localization="8" tooltip="Stores in NAOqi&apos;s shared memory the given value at the given key, and spreads the event to all its subscribers." x="422" y="144">
+                                                <bitmap>media/images/box/sensors/STM.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        self.memory = None
+
+    def onInput_onStart(self, p):
+        import json
+
+        data = json.loads(p)
+        key = str(data["key"])
+        value = str(data["value"])
+
+        self.memory.raiseEvent(key, value)
+        self.onStopped(key)
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommended to call onUnload of this box in a onStop method, as the code written in onUnload is used to stop the box as well
+        pass]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Receives the value to be inserted as an event in ALMemory." id="2" />
+                                                <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                <Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished. It contains the inserted value in ALMemory." id="4" />
+                                                <Output name="onError" type="3" type_size="1" nature="1" inner="0" tooltip="Output when error is raised by the behavior. Contains the error message." id="5" />
+                                            </Box>
+                                            <Link inputowner="4" indexofinput="2" outputowner="2" indexofoutput="5" />
+                                            <Link inputowner="5" indexofinput="2" outputowner="2" indexofoutput="5" />
+                                            <Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" />
+                                        </Diagram>
+                                    </BehaviorKeyframe>
+                                </BehaviorLayer>
+                            </Timeline>
+                        </Box>
+                        <Box name="N Show Image" id="2" localization="8" tooltip="" x="180" y="33">
+                            <bitmap>media/images/box/box-diagram.png</bitmap>
+                            <script language="4">
+                                <content>
+                                    <![CDATA[]]>
+</content>
+                            </script>
+                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                            <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                            <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                            <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
+                            <Parameter name="Timeout" inherits_from_parent="0" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
+                            <Parameter name="Image" inherits_from_parent="0" content_type="3" value="default.png" default_value="default.png" custom_choice="0" tooltip="" id="6" />
+                            <Timeline enable="0">
+                                <BehaviorLayer name="behavior_layer1">
+                                    <BehaviorKeyframe name="keyframe1" index="1">
+                                        <Diagram>
+                                            <Box name="HTTP Get" id="1" localization="8" tooltip="" x="92" y="18">
+                                                <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def _init_read_library(self):
+        import sys, os
+
+        self.folderName = os.path.join(
+            self.framemanager.getBehaviorPath(self.behaviorId), './lib')
+
+        if self.folderName not in sys.path:
+            sys.path.append(self.folderName)
 
     def onLoad(self):
         self.framemanager = ALProxy("ALFrameManager")
@@ -32,14 +278,9 @@
 
     def onInput_onStart(self):
 
-        url = "http://localhost:3000"
+        self._init_read_library()
 
-        import sys, os
-        # get path of lib directory
-        lib_dir = os.path.join(self.framemanager.getBehaviorPath(self.behaviorId), "lib")
-        # add path to system
-        if lib_dir not in sys.path:
-            sys.path.append(lib_dir)
+        url = "http://localhost:3000"
 
         import requests
         import json
@@ -47,15 +288,14 @@
         try:
             timeout = int(self.getParameter("Timeout"))
 
-            self.logger.info("Loading... %s" % url)
-
             data = {
-                "mode": self.getParameter("Mode")
+                "action": self.getParameter("Action"),
+                "image": self.getParameter("Image"),
             }
 
             res = requests.get(
                 url + "/http",
-                data = data,
+                params=data,
                 timeout=timeout
             )
 
@@ -76,15 +316,345 @@
         self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
         self.onStopped() #activate the output of the box]]>
 </content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
+                                                <Parameter name="Timeout" inherits_from_parent="1" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
+                                                <Parameter name="Action" inherits_from_parent="0" content_type="3" value="show_image" default_value="show_image" custom_choice="0" tooltip="" id="6" />
+                                                <Parameter name="Image" inherits_from_parent="1" content_type="3" value="default.png" default_value="default.png" custom_choice="0" tooltip="" id="7" />
+                                            </Box>
+                                            <Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" />
+                                            <Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" />
+                                        </Diagram>
+                                    </BehaviorKeyframe>
+                                </BehaviorLayer>
+                            </Timeline>
+                        </Box>
+                        <Box name="N Show Menu" id="1" localization="8" tooltip="" x="181" y="160">
+                            <bitmap>media/images/box/box-diagram.png</bitmap>
+                            <script language="4">
+                                <content>
+                                    <![CDATA[]]>
+</content>
                             </script>
                             <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                             <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
                             <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
                             <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
                             <Parameter name="Timeout" inherits_from_parent="0" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
-                            <Parameter name="Mode" inherits_from_parent="0" content_type="3" value="show_image" default_value="show_image" custom_choice="0" tooltip="" id="6" />
+                            <Timeline enable="0">
+                                <BehaviorLayer name="behavior_layer1">
+                                    <BehaviorKeyframe name="keyframe1" index="1">
+                                        <Diagram>
+                                            <Box name="HTTP Get" id="3" localization="8" tooltip="" x="87" y="19">
+                                                <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def _init_read_library(self):
+        import sys, os
+
+        self.folderName = os.path.join(
+            self.framemanager.getBehaviorPath(self.behaviorId), './lib')
+
+        if self.folderName not in sys.path:
+            sys.path.append(self.folderName)
+
+    def onLoad(self):
+        self.framemanager = ALProxy("ALFrameManager")
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+
+        self._init_read_library()
+
+        url = "http://localhost:3000"
+
+        import requests
+        import json
+
+        try:
+            timeout = int(self.getParameter("Timeout"))
+
+            data = {
+                "action": self.getParameter("Action"),
+                "image": self.getParameter("Image"),
+            }
+
+            res = requests.get(
+                url + "/http",
+                params=data,
+                timeout=timeout
+            )
+
+            self.logger.info("%s %s %s" % (res.request.method,
+                                           res.request.path_url,
+                                           res.status_code))
+
+            response_json = res.json()
+            self.logger.info(json.dumps(response_json, indent = 4))
+
+            self.onStopped(response_json)
+
+        except requests.exceptions.RequestException, message:
+            self.logger.warn("Failed to open: %s, message=%s" % (url, message))
+            self.onFailed(message)
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
+                                                <Parameter name="Timeout" inherits_from_parent="1" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
+                                                <Parameter name="Action" inherits_from_parent="0" content_type="3" value="show_menu" default_value="show_image" custom_choice="0" tooltip="" id="6" />
+                                                <Parameter name="Image" inherits_from_parent="0" content_type="3" value="" default_value="default.png" custom_choice="0" tooltip="" id="7" />
+                                            </Box>
+                                            <Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" />
+                                            <Link inputowner="0" indexofinput="4" outputowner="3" indexofoutput="4" />
+                                        </Diagram>
+                                    </BehaviorKeyframe>
+                                </BehaviorLayer>
+                            </Timeline>
                         </Box>
-                        <Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" />
+                        <Box name="N WS Receive Event" id="3" localization="8" tooltip="" x="356" y="414">
+                            <bitmap>media/images/box/box-diagram.png</bitmap>
+                            <script language="4">
+                                <content>
+                                    <![CDATA[]]>
+</content>
+                            </script>
+                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                            <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                            <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                            <Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
+                            <Parameter name="key" inherits_from_parent="0" content_type="3" value="101" default_value="" custom_choice="0" tooltip="" id="5" />
+                            <Timeline enable="0">
+                                <BehaviorLayer name="behavior_layer1">
+                                    <BehaviorKeyframe name="keyframe1" index="1">
+                                        <Diagram>
+                                            <Box name="Subscribe to Event" id="7" localization="8" tooltip="Subscribes to an event in NAOqi&apos;s shared memory.&#x0A;When subscribed, the output will be triggered every time the event is raised." x="104" y="17">
+                                                <bitmap>media/images/box/sensors/STM.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        self.BIND_PYTHON(self.getName(), "onEventCallback")
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        self.memory = None
+
+    def onInput_onStart(self):
+        self.memory.subscribeToEvent(self.getParameter("key"), self.getName(), "onEventCallback")
+
+    def onInput_onStop(self):
+        self.onStopped()
+
+    def onEventCallback(self, key, value, message):
+        self.onEvent(value)]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="" id="3" />
+                                                <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished. It contains the retrieved value from ALMemory." id="4" />
+                                                <Output name="onError" type="3" type_size="1" nature="1" inner="0" tooltip="Output when error is raised by the behavior. Contains the error message." id="5" />
+                                                <Output name="onEvent" type="0" type_size="1" nature="2" inner="0" tooltip="" id="6" />
+                                                <Parameter name="key" inherits_from_parent="1" content_type="3" value="" default_value="" custom_choice="0" tooltip="" id="7" />
+                                            </Box>
+                                            <Box name="Only Once" id="1" localization="8" tooltip="This box&apos;s output is stimulated only the first time the onSignal input is.&#x0A;&#x0A;Note: It is reset when the diagram containing the box is unloaded." x="266" y="21">
+                                                <bitmap>media/images/box/loop.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.bFirstTime = True
+
+    def onUnload(self):
+        self.bFirstTime = True
+
+    def onInput_onSignal(self, p):
+        if( self.bFirstTime ):
+            self.bFirstTime = False
+            self.firstTime(p)]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onSignal" type="0" type_size="1" nature="1" inner="0" tooltip="The signal that must pass only once." id="2" />
+                                                <Output name="firstTime" type="0" type_size="1" nature="2" inner="0" tooltip="Signal sent first time the onSignal input is stimulated." id="3" />
+                                            </Box>
+                                            <Box name="Log" id="2" localization="8" tooltip="Prompt the message in the debug window. You can set a prefix and a priority&#x0A;for the message in the parameters." x="455" y="118">
+                                                <bitmap>media/images/box/print.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        #~ puts code for box initialization here
+        pass
+
+    def onUnload(self):
+        #~ puts code for box cleanup here
+        pass
+
+    def onInput_message(self, p):
+        sPriority = self.getParameter("Priority")
+        sMessage = self.getParameter("Message prefix")
+        if( sMessage != "" and p != None ):
+            sMessage += ": "
+        if( p != None ):
+            sMessage += str(p)
+        if( sPriority == "Fatal" ):
+            self.logger.fatal( sMessage )
+        elif( sPriority == "Error" ):
+            self.logger.error( sMessage )
+        elif( sPriority == "Warning" ):
+            self.logger.warning( sMessage )
+        elif( sPriority == "Info" ):
+            self.logger.info( sMessage )
+        elif( sPriority == "Debug" ):
+            self.logger.debug( sMessage )
+        self.onDone()]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="message" type="0" type_size="1" nature="1" inner="0" tooltip='The message to print or a &quot;Bang&quot; to only print the message set as parameter.' id="2" />
+                                                <Output name="onDone" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent when box behavior is finished." id="3" />
+                                                <Parameter name="Message prefix" inherits_from_parent="0" content_type="3" value="Message text" default_value="Message text" custom_choice="0" tooltip="Enter the text you want to print before the input message." id="4" />
+                                                <Parameter name="Priority" inherits_from_parent="0" content_type="3" value="Info" default_value="Info" custom_choice="0" tooltip="Enter the priority of your message. If you select error, the box will get red when it will be stimulated." id="5">
+                                                    <Choice value="Fatal" />
+                                                    <Choice value="Error" />
+                                                    <Choice value="Warning" />
+                                                    <Choice value="Info" />
+                                                    <Choice value="Debug" />
+                                                </Parameter>
+                                            </Box>
+                                            <Link inputowner="7" indexofinput="2" outputowner="0" indexofoutput="2" />
+                                            <Link inputowner="1" indexofinput="2" outputowner="7" indexofoutput="6" />
+                                            <Link inputowner="2" indexofinput="2" outputowner="1" indexofoutput="3" />
+                                            <Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="3" />
+                                        </Diagram>
+                                    </BehaviorKeyframe>
+                                </BehaviorLayer>
+                            </Timeline>
+                        </Box>
+                        <Box name="N Hide Iframe" id="4" localization="8" tooltip="" x="177" y="281">
+                            <bitmap>media/images/box/box-diagram.png</bitmap>
+                            <script language="4">
+                                <content>
+                                    <![CDATA[]]>
+</content>
+                            </script>
+                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                            <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                            <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                            <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
+                            <Parameter name="Timeout" inherits_from_parent="0" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
+                            <Timeline enable="0">
+                                <BehaviorLayer name="behavior_layer1">
+                                    <BehaviorKeyframe name="keyframe1" index="1">
+                                        <Diagram>
+                                            <Box name="HTTP Get" id="3" localization="8" tooltip="" x="87" y="19">
+                                                <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def _init_read_library(self):
+        import sys, os
+
+        self.folderName = os.path.join(
+            self.framemanager.getBehaviorPath(self.behaviorId), './lib')
+
+        if self.folderName not in sys.path:
+            sys.path.append(self.folderName)
+
+    def onLoad(self):
+        self.framemanager = ALProxy("ALFrameManager")
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+
+        self._init_read_library()
+
+        url = "http://localhost:3000"
+
+        import requests
+        import json
+
+        try:
+            timeout = int(self.getParameter("Timeout"))
+
+            data = {
+                "action": self.getParameter("Action"),
+                "image": self.getParameter("Image"),
+            }
+
+            res = requests.get(
+                url + "/http",
+                params=data,
+                timeout=timeout
+            )
+
+            self.logger.info("%s %s %s" % (res.request.method,
+                                           res.request.path_url,
+                                           res.status_code))
+
+            response_json = res.json()
+            self.logger.info(json.dumps(response_json, indent = 4))
+
+            self.onStopped(response_json)
+
+        except requests.exceptions.RequestException, message:
+            self.logger.warn("Failed to open: %s, message=%s" % (url, message))
+            self.onFailed(message)
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
+                                                <Parameter name="Timeout" inherits_from_parent="1" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
+                                                <Parameter name="Action" inherits_from_parent="0" content_type="3" value="hide_iframe" default_value="show_image" custom_choice="0" tooltip="" id="6" />
+                                                <Parameter name="Image" inherits_from_parent="0" content_type="3" value="" default_value="default.png" custom_choice="0" tooltip="" id="7" />
+                                            </Box>
+                                            <Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" />
+                                            <Link inputowner="0" indexofinput="4" outputowner="3" indexofoutput="4" />
+                                        </Diagram>
+                                    </BehaviorKeyframe>
+                                </BehaviorLayer>
+                            </Timeline>
+                        </Box>
                     </Diagram>
                 </BehaviorKeyframe>
             </BehaviorLayer>
