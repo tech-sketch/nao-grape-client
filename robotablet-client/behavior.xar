@@ -35,13 +35,12 @@
         url = "http://localhost:3000"
 
         import sys, os
-        # ライブラリまでのパスを取得
+        # get path of lib directory
         lib_dir = os.path.join(self.framemanager.getBehaviorPath(self.behaviorId), "lib")
-        # パスを追加
+        # add path to system
         if lib_dir not in sys.path:
             sys.path.append(lib_dir)
 
-        # 読み込み
         import requests
         import json
 
