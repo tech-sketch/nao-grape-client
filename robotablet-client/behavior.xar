@@ -51,7 +51,7 @@
             self.logger.info("Loading... %s" % url)
 
             data = {
-                "mode": "show_html"
+                "mode": self.getParameter("Mode")
             }
 
             res = requests.get(
@@ -67,7 +67,7 @@
             response_json = res.json()
             self.logger.info(json.dumps(response_json, indent = 4))
 
-            self.onStopped("ok")
+            self.onStopped(response_json)
 
         except requests.exceptions.RequestException, message:
             self.logger.warn("Failed to open: %s, message=%s" % (url, message))
@@ -83,6 +83,7 @@
                             <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
                             <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
                             <Parameter name="Timeout" inherits_from_parent="0" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
+                            <Parameter name="Mode" inherits_from_parent="0" content_type="3" value="show_image" default_value="show_image" custom_choice="0" tooltip="" id="6" />
                         </Box>
                         <Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" />
                     </Diagram>
