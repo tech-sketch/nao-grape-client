@@ -15,7 +15,7 @@
             <BehaviorLayer name="behavior_layer1">
                 <BehaviorKeyframe name="keyframe1" index="1">
                     <Diagram>
-                        <Box name="N WS Connect" id="6" localization="8" tooltip="" x="174" y="412">
+                        <Box name="N WS Connect" id="6" localization="8" tooltip="" x="131" y="400">
                             <bitmap>media/images/box/box-diagram.png</bitmap>
                             <script language="4">
                                 <content>
@@ -26,6 +26,8 @@
                             <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
                             <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
                             <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
+                            <Parameter name="ws_url" inherits_from_parent="0" content_type="3" value="ws://localhost:3000" default_value="ws://localhost:3000" custom_choice="0" tooltip="" id="5" />
+                            <Parameter name="use_global_url" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="" id="6" />
                             <Timeline enable="0">
                                 <BehaviorLayer name="behavior_layer1">
                                     <BehaviorKeyframe name="keyframe1" index="1">
@@ -55,9 +57,15 @@ class MyClass(GeneratedClass):
         websocket.enableTrace(True)
         websocket.setdefaulttimeout(500)
 
-        ws_url = 'ws://' + 'localhost:3000' + '/rs'
+        use_global_url = self.getParameter("use_global_url")
 
-        self.ws = websocket.WebSocketApp(ws_url,
+        if use_global_url:
+            ws_url = self.memory.getData("global_ws_url")
+
+        else:
+            ws_url = self.getParameter("ws_url")
+
+        self.ws = websocket.WebSocketApp(ws_url + '/rs',
                                          on_message=self._ws_on_message,
                                          on_error=self._ws_on_error,
                                          on_close=self._ws_on_close)
@@ -115,6 +123,7 @@ class MyClass(GeneratedClass):
         self.connectonToken = None
 
         self.framemanager = ALProxy("ALFrameManager")
+        self.memory = ALProxy("ALMemory")
 
         self.isVirtualRobot = False
 
@@ -127,6 +136,7 @@ class MyClass(GeneratedClass):
         self.connectonToken = None
 
         self.framemanager = None
+        self.memory = None
 
     def onInput_onStart(self):
 
@@ -145,6 +155,8 @@ class MyClass(GeneratedClass):
                                                 <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
                                                 <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
                                                 <Output name="onMessageReceived" type="3" type_size="1" nature="1" inner="0" tooltip="" id="5" />
+                                                <Parameter name="ws_url" inherits_from_parent="1" content_type="3" value="ws://localhost:3000" default_value="ws://localhost:3000" custom_choice="0" tooltip="" id="6" />
+                                                <Parameter name="use_global_url" inherits_from_parent="1" content_type="0" value="1" default_value="1" tooltip="" id="7" />
                                             </Box>
                                             <Box name="Log" id="4" localization="8" tooltip="Prompt the message in the debug window. You can set a prefix and a priority&#x0A;for the message in the parameters." x="516" y="38">
                                                 <bitmap>media/images/box/print.png</bitmap>
@@ -263,7 +275,7 @@ class MyClass(GeneratedClass):
                                 </BehaviorLayer>
                             </Timeline>
                         </Box>
-                        <Box name="N Show Image" id="2" localization="8" tooltip="" x="180" y="33">
+                        <Box name="N Show Image" id="2" localization="8" tooltip="" x="332" y="34">
                             <bitmap>media/images/box/box-diagram.png</bitmap>
                             <script language="4">
                                 <content>
@@ -276,6 +288,8 @@ class MyClass(GeneratedClass):
                             <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
                             <Parameter name="Timeout" inherits_from_parent="0" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
                             <Parameter name="Image" inherits_from_parent="0" content_type="3" value="default.png" default_value="default.png" custom_choice="0" tooltip="" id="6" />
+                            <Parameter name="http_url" inherits_from_parent="0" content_type="3" value="http://localhost:3000" default_value="http://localhost:3000" custom_choice="0" tooltip="" id="7" />
+                            <Parameter name="use_global_url" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="" id="8" />
                             <Timeline enable="0">
                                 <BehaviorLayer name="behavior_layer1">
                                     <BehaviorKeyframe name="keyframe1" index="1">
@@ -299,16 +313,25 @@ class MyClass(GeneratedClass):
 
     def onLoad(self):
         self.framemanager = ALProxy("ALFrameManager")
+        self.memory = ALProxy("ALMemory")
 
     def onUnload(self):
-        #put clean-up code here
-        pass
+        self.framemanager = None
+        self.memory = None
 
     def onInput_onStart(self):
 
         self._init_read_library()
 
-        url = "http://localhost:3000"
+        use_global_url = self.getParameter("use_global_url")
+
+        if use_global_url:
+            http_url = self.memory.getData("global_http_url")
+
+        else:
+            http_url = self.getParameter("http_url")
+
+        url = http_url
 
         import requests
         import json
@@ -352,6 +375,8 @@ class MyClass(GeneratedClass):
                                                 <Parameter name="Timeout" inherits_from_parent="1" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
                                                 <Parameter name="Action" inherits_from_parent="0" content_type="3" value="show_image" default_value="show_image" custom_choice="0" tooltip="" id="6" />
                                                 <Parameter name="Image" inherits_from_parent="1" content_type="3" value="default.png" default_value="default.png" custom_choice="0" tooltip="" id="7" />
+                                                <Parameter name="http_url" inherits_from_parent="1" content_type="3" value="http://localhost:3000" default_value="http://localhost:3000" custom_choice="0" tooltip="" id="8" />
+                                                <Parameter name="use_global_url" inherits_from_parent="1" content_type="0" value="1" default_value="1" tooltip="" id="9" />
                                             </Box>
                                             <Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" />
                                             <Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" />
@@ -360,7 +385,7 @@ class MyClass(GeneratedClass):
                                 </BehaviorLayer>
                             </Timeline>
                         </Box>
-                        <Box name="N Show Menu" id="1" localization="8" tooltip="" x="181" y="160">
+                        <Box name="N Show Menu" id="1" localization="8" tooltip="" x="336" y="135">
                             <bitmap>media/images/box/box-diagram.png</bitmap>
                             <script language="4">
                                 <content>
@@ -372,6 +397,8 @@ class MyClass(GeneratedClass):
                             <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
                             <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
                             <Parameter name="Timeout" inherits_from_parent="0" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
+                            <Parameter name="http_url" inherits_from_parent="0" content_type="3" value="http://localhost:3000" default_value="http://localhost:3000" custom_choice="0" tooltip="" id="6" />
+                            <Parameter name="use_global_url" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="" id="7" />
                             <Timeline enable="0">
                                 <BehaviorLayer name="behavior_layer1">
                                     <BehaviorKeyframe name="keyframe1" index="1">
@@ -395,16 +422,25 @@ class MyClass(GeneratedClass):
 
     def onLoad(self):
         self.framemanager = ALProxy("ALFrameManager")
+        self.memory = ALProxy("ALMemory")
 
     def onUnload(self):
-        #put clean-up code here
-        pass
+        self.framemanager = None
+        self.memory = None
 
     def onInput_onStart(self):
 
         self._init_read_library()
 
-        url = "http://localhost:3000"
+        use_global_url = self.getParameter("use_global_url")
+
+        if use_global_url:
+            http_url = self.memory.getData("global_http_url")
+
+        else:
+            http_url = self.getParameter("http_url")
+
+        url = http_url
 
         import requests
         import json
@@ -448,6 +484,8 @@ class MyClass(GeneratedClass):
                                                 <Parameter name="Timeout" inherits_from_parent="1" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
                                                 <Parameter name="Action" inherits_from_parent="0" content_type="3" value="show_menu" default_value="show_image" custom_choice="0" tooltip="" id="6" />
                                                 <Parameter name="Image" inherits_from_parent="0" content_type="3" value="" default_value="default.png" custom_choice="0" tooltip="" id="7" />
+                                                <Parameter name="http_url" inherits_from_parent="1" content_type="3" value="http://localhost:3000" default_value="" custom_choice="0" tooltip="" id="8" />
+                                                <Parameter name="use_global_url" inherits_from_parent="1" content_type="0" value="1" default_value="1" tooltip="" id="9" />
                                             </Box>
                                             <Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" />
                                             <Link inputowner="0" indexofinput="4" outputowner="3" indexofoutput="4" />
@@ -456,7 +494,7 @@ class MyClass(GeneratedClass):
                                 </BehaviorLayer>
                             </Timeline>
                         </Box>
-                        <Box name="N WS Receive Event" id="3" localization="8" tooltip="" x="353" y="410">
+                        <Box name="N WS Receive Event" id="3" localization="8" tooltip="" x="345" y="396">
                             <bitmap>media/images/box/box-diagram.png</bitmap>
                             <script language="4">
                                 <content>
@@ -596,7 +634,7 @@ class MyClass(GeneratedClass):
                                 </BehaviorLayer>
                             </Timeline>
                         </Box>
-                        <Box name="N Hide Iframe" id="4" localization="8" tooltip="" x="177" y="281">
+                        <Box name="N Hide Iframe" id="4" localization="8" tooltip="" x="338" y="232">
                             <bitmap>media/images/box/box-diagram.png</bitmap>
                             <script language="4">
                                 <content>
@@ -608,6 +646,8 @@ class MyClass(GeneratedClass):
                             <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
                             <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" />
                             <Parameter name="Timeout" inherits_from_parent="0" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
+                            <Parameter name="http_url" inherits_from_parent="0" content_type="3" value="http://localhost:3000" default_value="http://localhost:3000" custom_choice="0" tooltip="" id="6" />
+                            <Parameter name="use_global_url" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="" id="7" />
                             <Timeline enable="0">
                                 <BehaviorLayer name="behavior_layer1">
                                     <BehaviorKeyframe name="keyframe1" index="1">
@@ -631,16 +671,25 @@ class MyClass(GeneratedClass):
 
     def onLoad(self):
         self.framemanager = ALProxy("ALFrameManager")
+        self.memory = ALProxy("ALMemory")
 
     def onUnload(self):
-        #put clean-up code here
-        pass
+        self.framemanager = None
+        self.memory = None
 
     def onInput_onStart(self):
 
         self._init_read_library()
 
-        url = "http://localhost:3000"
+        use_global_url = self.getParameter("use_global_url")
+
+        if use_global_url:
+            http_url = self.memory.getData("global_http_url")
+
+        else:
+            http_url = self.getParameter("http_url")
+
+        url = http_url
 
         import requests
         import json
@@ -684,6 +733,8 @@ class MyClass(GeneratedClass):
                                                 <Parameter name="Timeout" inherits_from_parent="1" content_type="1" value="10" default_value="10" min="1" max="120" tooltip="" id="5" />
                                                 <Parameter name="Action" inherits_from_parent="0" content_type="3" value="hide_iframe" default_value="show_image" custom_choice="0" tooltip="" id="6" />
                                                 <Parameter name="Image" inherits_from_parent="0" content_type="3" value="" default_value="default.png" custom_choice="0" tooltip="" id="7" />
+                                                <Parameter name="http_url" inherits_from_parent="1" content_type="3" value="http://localhost:3000" default_value="http://localhost:3000" custom_choice="0" tooltip="" id="8" />
+                                                <Parameter name="use_global_url" inherits_from_parent="1" content_type="0" value="1" default_value="1" tooltip="" id="9" />
                                             </Box>
                                             <Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" />
                                             <Link inputowner="0" indexofinput="4" outputowner="3" indexofoutput="4" />
@@ -691,6 +742,39 @@ class MyClass(GeneratedClass):
                                     </BehaviorKeyframe>
                                 </BehaviorLayer>
                             </Timeline>
+                        </Box>
+                        <Box name="N Init Parameters" id="5" localization="8" tooltip="Stores in NAOqi&apos;s shared memory the given value at the given key." x="121" y="38">
+                            <bitmap>media/images/box/sensors/STM.png</bitmap>
+                            <script language="4">
+                                <content>
+                                    <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        self.memory = None
+
+    def onInput_onStart(self):
+        self.memory.insertData("global_http_url", self.getParameter("global_http_url"))
+        self.memory.insertData("global_ws_url", self.getParameter("global_ws_url"))
+
+        self.onStopped()
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommended to call onUnload of this box in a onStop method, as the code written in onUnload is used to stop the box as well
+        pass]]>
+</content>
+                            </script>
+                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                            <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Receives the value to be inserted in ALMemory." id="2" />
+                            <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                            <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished. It contains the inserted value in ALMemory." id="4" />
+                            <Parameter name="global_http_url" inherits_from_parent="0" content_type="3" value="http://localhost:4000" default_value="http://localhost:3000" custom_choice="0" tooltip="" id="5" />
+                            <Parameter name="global_ws_url" inherits_from_parent="0" content_type="3" value="ws://localhost:4000" default_value="ws://localhost:3000" custom_choice="0" tooltip="" id="6" />
                         </Box>
                     </Diagram>
                 </BehaviorKeyframe>
