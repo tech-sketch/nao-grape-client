@@ -1,25 +1,25 @@
-robotablet-client
+nao-grape-client
 ====
 
 ## Description
 
-* [Server Application](https://github.com/shiraco/robotablet)
-* [Client Application](https://github.com/shiraco/robotablet-client)
+* [Server Application](https://github.com/tech-sketch/nao-grape-server)
+* [Client Application](https://github.com/tech-sketch/nao-grape-client)
 
 ## Requirement
 
 * [yyuu/pyenv](https://github.com/yyuu/pyenv)
 
-* [python 2.7.x (use pyenv)](https://github.com/shiraco/robotablet-client/blob/master/.python-version)
+* [python 2.7.x (use pyenv)](https://github.com/tech-sketch/nao-grape-client/blob/master/.python-version)
 
 * [pypa/virtualenv](https://github.com/pypa/virtualenv)
 
-* [python library](https://github.com/shiraco/robotablet-client/blob/master/rrequirements.txt)
+* [python library](https://github.com/tech-sketch/nao-grape-client/blob/master/rrequirements.txt)
 
 ## Install
 
 ```
-$ git clone https://github.com/shiraco/robotablet-client.git
+$ git clone https://github.com/tech-sketch/nao-grape-client.git
 ```
 
 ## Usage
@@ -27,7 +27,7 @@ $ git clone https://github.com/shiraco/robotablet-client.git
 ### Setup
 
 ```
-$ cd /path/to/robotablet-client
+$ cd /path/to/nao-grape-client
 $ pyenv local 2.7.11
 $ virtualenv .venv
 $ rm -rf robotablet-client/lib/*
@@ -42,16 +42,12 @@ Run Choregraphe and open robotablet-client/robotablet-client.pml .
 
 Setting up below parameters.
 
-* server host: (your robotablet-server host address)
+* server host: (your server host address)
 
 ### Run Application
 
-Connect to the my tobot and run this application.
-
-## Licence
-
-[MIT License](https://github.com/shiraco/robotablet-client/blob/master/LICENSE)
+Connect to the my robot and run this application.
 
 ## Author
 
-[shiraco](https://github.com/shiraco)
+[Tech-Sketch](https://github.com/tech-sketch)
