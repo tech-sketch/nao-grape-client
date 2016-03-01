@@ -30,7 +30,7 @@
         <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Receives the value to be inserted in ALMemory." id="2" />
         <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
         <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished. It contains the inserted value in ALMemory." id="4" />
-        <Parameter name="global_http_url" inherits_from_parent="0" content_type="3" value="http://localhost:4000" default_value="http://localhost:3000" custom_choice="0" tooltip="" id="5" />
-        <Parameter name="global_ws_url" inherits_from_parent="0" content_type="3" value="ws://localhost:4000" default_value="ws://localhost:3000" custom_choice="0" tooltip="" id="6" />
+        <Parameter name="global_http_url" inherits_from_parent="0" content_type="3" value="http://localhost:3000" default_value="http://localhost:3000" custom_choice="0" tooltip="" id="5" />
+        <Parameter name="global_ws_url" inherits_from_parent="0" content_type="3" value="ws://localhost:3000" default_value="ws://localhost:3000" custom_choice="0" tooltip="" id="6" />
     </Box>
 </ChoregrapheBox>
