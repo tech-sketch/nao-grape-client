@@ -9,10 +9,51 @@ nao-grape-client
 
 ## Requirement
 
-* [yyuu/pyenv](https://github.com/yyuu/pyenv)
-* python 2.7.x (use pyenv)
+* Multiple Python Virtual Environment
+* Python Runtime
+* Python Virtual Environment
+* Dependency Libraries
+
+
+### Multiple Python Virtual Environment
+
+* [yyuu/pyenv](https://github.com/yyuu/pyenv) [Linux/Mac]
+* [Miniconda](http://conda.pydata.org/miniconda.html) [Windows]
+
+### Python Runtime
+
+python 2.7.x
+
+* use pyenv [Linux/Mac]
+
+```
+$ pyenv install -l
+$ pyenv install 2.7.11
+```
+
+* install with Miniconda [Windows]
+
+### Python Virtual Environment
+
+* [pypa/virtualenv](https://github.com/pypa/virtualenv) [Linux/Mac/Windows]
+
+```
+$ pip install virtualenv
+```
+
+### Python Virtual Environment
+
 * [pypa/virtualenv](https://github.com/pypa/virtualenv)
+
+```
+$ pip install virtualenv
+```
+
+### Dependency Libraries
+
 * python library
+
+See requirements.txt
 
 ## Install
 
@@ -20,12 +61,23 @@ nao-grape-client
 
 ### Setup
 
+* [Linux/Mac]
+
 ```
 $ cd /path/to/nao-grape-client
 $ pyenv local 2.7.11
 $ virtualenv .venv
 $ rm -rf robotablet-client/lib/*
 $ .venv/bin/pip install -r requirements.txt --target robotablet-client/lib --no-compile
+```
+
+* [Windows]
+
+```
+$ cd /path/to/nao-grape-client
+$ virtualenv .venv
+$ rm -rf robotablet-client/lib/*
+$ .venv/Scripts/pip install -r requirements.txt --target robotablet-client/lib --no-compile
 ```
 
 ### Open with Choregraphe
