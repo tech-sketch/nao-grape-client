@@ -3,24 +3,18 @@ nao-grape-client
 
 ## Description
 
-* [Server Application](https://github.com/tech-sketch/nao-grape-server)
-* [Client Application](https://github.com/tech-sketch/nao-grape-client)
+* Server Application (nao-grape-server)
+* Client Application (nao-grape-client)
+* Client Application Demo (nao-grape-client-demo)
 
 ## Requirement
 
 * [yyuu/pyenv](https://github.com/yyuu/pyenv)
-
-* [python 2.7.x (use pyenv)](https://github.com/tech-sketch/nao-grape-client/blob/master/.python-version)
-
+* python 2.7.x (use pyenv)
 * [pypa/virtualenv](https://github.com/pypa/virtualenv)
-
-* [python library](https://github.com/tech-sketch/nao-grape-client/blob/master/rrequirements.txt)
+* python library
 
 ## Install
-
-```
-$ git clone https://github.com/tech-sketch/nao-grape-client.git
-```
 
 ## Usage
 
@@ -50,4 +44,4 @@ Connect to the my robot and run this application.
 
 ## Author
 
-[Tech-Sketch](https://github.com/tech-sketch)
+[TIS Inc.](http://www.tis.co.jp/)
