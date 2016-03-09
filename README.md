@@ -66,18 +66,16 @@ See requirements.txt
 ```
 $ cd /path/to/nao-grape-client
 $ pyenv local 2.7.11
-$ virtualenv .venv
 $ rm -rf robotablet-client/lib/*
-$ .venv/bin/pip install -r requirements.txt --target robotablet-client/lib --no-compile
+$ pip install -r requirements.txt --target robotablet-client/lib --no-compile
 ```
 
 * [Windows]
 
 ```
 $ cd /path/to/nao-grape-client
-$ virtualenv .venv
 $ rm -rf robotablet-client/lib/*
-$ .venv/Scripts/pip install -r requirements.txt --target robotablet-client/lib --no-compile
+$ pip install -r requirements.txt --target robotablet-client/lib --no-compile
 ```
 
 ### Open with Choregraphe
